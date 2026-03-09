@@ -12,6 +12,7 @@ return new class extends Migration {
             $table->string('first_name');
             $table->string('last_name');
             $table->string('address');
+            $table->string('phone_number');
             $table->date('birth_date');
             $table->foreignId('user_id')
                 ->nullable()

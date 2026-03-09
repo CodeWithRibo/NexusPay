@@ -15,6 +15,7 @@ class UserInformation extends Model
         'first_name',
         'last_name',
         'address',
+        'phone_number',
         'birth_date',
         'user_id',
         'department_id'
