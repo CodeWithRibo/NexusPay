@@ -23,9 +23,11 @@ class AuthController extends Controller
 
         if ($validated)
         {
-            $inputBirthDate = $request->birth_date;
-            $getDate= Carbon::parse($inputBirthDate)->format('Ymd');
+            $birthDate = $request->birth_date;
+            $getDate = $birthDate['year'].$birthDate['month'].$birthDate['day'];
             $generateDefPassword = $request->last_name.$getDate;
+
+            $timestamp = Carbon::create($birthDate['year'],$birthDate['month'],$birthDate['day'])->format('Y-m-d');
 
              $user = User::query()
                 ->create([
@@ -40,11 +42,11 @@ class AuthController extends Controller
                     'last_name' => $request->last_name,
                     'address' => $request->address,
                     'phone_number' => $request->phone_number,
-                    'birth_date' => $request->birth_date,
+                    'birth_date' => $timestamp,
                     'user_id' => $user->id,
                 ]);
         }
-        return to_route('auth.index');
+        return to_route('home');
     }
 
     public function store(Request $request)
