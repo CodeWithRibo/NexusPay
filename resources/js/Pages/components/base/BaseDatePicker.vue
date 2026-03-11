@@ -8,24 +8,20 @@ import {
 
 import { CalendarIcon } from "lucide-vue-next";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import { ref } from "vue";
-import { Button } from "@/components/ui/button";
-
 const defaultPlaceholder = today(getLocalTimeZone());
-const date = ref();
 
 const df = new DateFormatter("en-US", {
     dateStyle: "long",
 });
 
-const model = defineModel();
-
+const model = defineModel<DateValue>();
 defineProps({
     error: String,
 });
@@ -40,14 +36,14 @@ defineProps({
                     { 'border-red-500': error },
                     cn(
                         'w-full justify-start text-left font-normal',
-                        !date && 'text-muted-foreground',
+                        !model && 'text-muted-foreground',
                     ),
                 ]"
             >
                 <CalendarIcon />
                 {{
-                    date
-                        ? df.format(date.toDate(getLocalTimeZone()))
+                    model
+                        ? df.format(model.toDate(getLocalTimeZone()))
                         : "Pick a date"
                 }}
             </Button>
@@ -61,8 +57,8 @@ defineProps({
                 @update:model-value="close"
             />
         </PopoverContent>
+        <p v-if="error" class="text-sm font-medium text-red-500 italic">
+            {{ error }}
+        </p>
     </Popover>
-    <p v-if="error" class="text-sm font-medium text-red-500 italic">
-        {{ error }}
-    </p>
 </template>
