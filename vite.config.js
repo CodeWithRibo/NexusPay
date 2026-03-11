@@ -16,5 +16,6 @@ export default defineConfig({
         watch: {
             ignored: ["**/storage/framework/views/**"],
         },
+        cors: true,
     },
 });
