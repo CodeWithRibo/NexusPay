@@ -1,100 +1,109 @@
 <script setup>
+import { Button } from "@/components/ui/button/index.js";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input/index.js";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import BaseInput from "@/Pages/components/base/BaseInput.vue";
+import BaseDatePicker from "@/Pages/components/base/BaseDatePicker.vue";
+import { Label } from "@/components/ui/label/index.js";
 
 const emit = defineEmits(["submit"]);
 defineProps({ form: Object });
+
 const handleSubmit = () => {
     emit("submit");
 };
 </script>
 
 <template>
-    <div>
-        <form @submit.prevent="handleSubmit">
-            <fieldset
-                class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4"
-            >
-                <legend class="fieldset-legend">Register</legend>
-
-                <select class="select" v-model="form.role">
-                    <option disabled selected>Select Role</option>
-                    <option value="student">Student</option>
-                    <option value="cashier">Cashier</option>
-                    <option value="admin">Admin</option>
-                </select>
-                <div v-if="form.errors.role">
-                    {{ form.errors.role }}
-                </div>
-
-                <div v-if="form.role === 'student'">
-                    <BaseInput
-                        type="text"
-                        label="Student ID"
-                        placeholder="02000411496"
-                        v-model="form.student_id"
-                    />
-                </div>
-                <div v-if="form.errors.student_id">
-                    {{ form.errors.student_id }}
-                </div>
-                <BaseInput
-                    type="text"
-                    label="First Name"
-                    placeholder="Juan"
-                    v-model="form.first_name"
-                />
-                <div v-if="form.errors.first_name">
-                    {{ form.errors.first_name }}
-                </div>
-                <BaseInput
-                    type="text"
-                    label="Last Name"
-                    placeholder="Dela Cruz"
-                    v-model="form.last_name"
-                />
-                <div v-if="form.errors.last_name">
-                    {{ form.errors.last_name }}
-                </div>
-                <BaseInput
-                    type="email"
-                    label="Email"
-                    placeholder="juandelacruz@gmail.com"
-                    v-model="form.email"
-                />
-                <div v-if="form.errors.email">
-                    {{ form.errors.email }}
-                </div>
-                <BaseInput
-                    type="text"
-                    label="Address"
-                    placeholder="123 Samson Road"
-                    v-model="form.address"
-                />
-                <div v-if="form.errors.address">
-                    {{ form.errors.address }}
-                </div>
-                <BaseInput
-                    type="date"
-                    label="Birth Date"
-                    v-model="form.birth_date"
-                />
-                <div v-if="form.errors.birth_date">
-                    {{ form.errors.birth_date }}
-                </div>
-                <BaseInput
-                    type="text"
-                    label="Phone Number"
-                    placeholder="09933404219"
-                    v-model="form.phone_number"
-                />
-                <div v-if="form.errors.phone_number">
-                    {{ form.errors.phone_number }}
-                </div>
-
-                <button type="submit" class="btn btn-neutral mt-4">
-                    Register
-                </button>
-            </fieldset>
-        </form>
-    </div>
+    <Dialog>
+        <DialogTrigger>
+            <Button>Register Account</Button>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Register Account</DialogTitle>
+                    <DialogDescription>
+                        <form @submit.prevent="handleSubmit">
+                            <Label>Role</Label>
+                            <Select class="w-full" v-model="form.role">
+                                <SelectTrigger
+                                    :error="form.errors.role"
+                                    class="w-full"
+                                >
+                                    <SelectValue placeholder="Select role" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="student"
+                                        >Student</SelectItem
+                                    >
+                                    <SelectItem value="cashier"
+                                        >Cashier</SelectItem
+                                    >
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <div v-if="form.role === 'student'">
+                                <BaseInput
+                                    label="Student ID"
+                                    placeholder="02000411497"
+                                    v-model="form.student_id"
+                                    :error="form.errors.student_id"
+                                />
+                            </div>
+                            <BaseInput
+                                label="Email"
+                                placeholder="zeamon@gmail.com"
+                                v-model="form.email"
+                                :error="form.errors.email"
+                            />
+                            <BaseInput
+                                label="First Name"
+                                placeholder="Zeamon"
+                                v-model="form.first_name"
+                                :error="form.errors.first_name"
+                            />
+                            <BaseInput
+                                label="Last Name"
+                                placeholder="Mabaog"
+                                v-model="form.last_name"
+                                :error="form.errors.last_name"
+                            />
+                            <BaseInput
+                                label="Address"
+                                placeholder="123 Samson Road"
+                                v-model="form.address"
+                                :error="form.errors.address"
+                            />
+                            <div class="flex flex-col">
+                                <Label for="birth_date">Birth Date</Label>
+                                <BaseDatePicker
+                                    v-model="form.birth_date"
+                                    :error="form.errors.birth_date"
+                                />
+                            </div>
+                            <BaseInput
+                                label="Phone Number (Optional)"
+                                placeholder="09933404419"
+                                v-model="form.phone_number"
+                            />
+                            <Button type="submit">Submit</Button>
+                        </form>
+                    </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
+        </DialogTrigger>
+    </Dialog>
 </template>

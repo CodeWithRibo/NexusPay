@@ -2,10 +2,6 @@
 import { useForm } from "@inertiajs/vue3";
 import RegisterForm from "@/Pages/components/auth/RegisterForm.vue";
 
-const props = defineProps({
-    firstName: String,
-});
-console.log(props.firstName);
 const form = useForm({
     student_id: null,
     first_name: null,
@@ -26,11 +22,10 @@ const submitForm = () => {
 </script>
 
 <template>
+    <div class="text-5xl">Hello World</div>
     <div
         class="flex items-center justify-center mx-auto min-h-screen max-w-7xl"
     >
         <RegisterForm :form="form" @submit="submitForm" />
     </div>
 </template>
-
-<style scoped></style>
