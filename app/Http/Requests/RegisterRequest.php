@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Password;
 
-class AuthRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     public function rules(): array
     {
