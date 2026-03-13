@@ -14,7 +14,7 @@ const form = useForm({
 });
 
 const submitForm = () => {
-    form.post(route("auth.register"), {
+    form.post(route("register.store"), {
         onSuccess: () => form.reset(),
         onError: (error) => {},
     });
