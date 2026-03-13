@@ -15,6 +15,11 @@
         "Noto Color Emoji";
 }
 
+/*Kiosk Layout*/
+.background{
+    @apply bg-[#121212] text-white w-full flex items-center justify-center relative min-h-screen;
+}
+
 @theme inline {
     --radius-sm:
         calc(var(--radius) - 4px);
@@ -225,6 +230,6 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground m-0 p-0;
     }
 }
