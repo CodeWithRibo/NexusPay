@@ -3,42 +3,45 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use App\Models\UserInformation;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
-class AuthController extends Controller
+class RegisterController extends Controller
 {
-    public function showRegister()
+    public function index()
+    {
+
+    }
+
+    public function create()
     {
         return Inertia::render('Register');
     }
 
-    public function register(RegisterRequest $request)
+    public function store(RegisterRequest $request)
     {
         $validated = $request->validated();
 
         if ($validated)
         {
             $birthDate = $request->birth_date;
+            $timestamp = Carbon::create($birthDate['year'],$birthDate['month'],$birthDate['day'])->format('Y-m-d');
+
             $dateString = "{$birthDate['year']}-{$birthDate['month']}-{$birthDate['day']}";
             $formattedDate = Carbon::parse($dateString)->format('Ymd');
 
-            $timestamp = Carbon::create($birthDate['year'],$birthDate['month'],$birthDate['day'])->format('Y-m-d');
-
-            $deffPass =  str_replace(' ', '', strtoupper($request->last_name)) . $formattedDate;
+            $lastName =  str_replace(' ', '', strtolower($request->last_name));
+            $defaultPass = $lastName . $formattedDate;
 
             $user = User::query()
                 ->create([
                     'student_id' => $request->role === 'student' ? $request->student_id : null,
                     'email' => $request->email,
-                    'password' => $deffPass,
+                    'password' => $defaultPass,
                     'role' => $request->role,
                 ]);
             UserInformation::query()
@@ -52,43 +55,5 @@ class AuthController extends Controller
                 ]);
         }
         return to_route('home');
-    }
-
-    public function showLogin ()
-    {
-        return Inertia::render('Login');
-    }
-
-    public function login(LoginRequest $request) {
-        $login = $request->input('login');
-        $password = $request->input('password');
-
-        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'student_id';
-
-        if (Auth::guard('web')->attempt([$fieldType => $login, 'password' => $password])) {
-            $request->session()->regenerate();
-
-            return to_route('home');
-        }
-        return back()->withErrors([
-            'login' => 'Invalid credentials',
-        ]);
-
-    }
-
-    public function show($id)
-    {
-    }
-
-    public function edit($id)
-    {
-    }
-
-    public function update(Request $request, $id)
-    {
-    }
-
-    public function destroy($id)
-    {
     }
 }
