@@ -1,8 +1,39 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
- return Inertia::render('Home');
+
+Route::get('/logout', function (Request $request) {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
 });
+
+Route::middleware(['guest'])->group(function () {
+    Route::get('login', [LoginController::class, 'create'])->name('login.create');
+    Route::post('login', [LoginController::class, 'store'])->name('login.store');
+    Route::get('register', [RegisterController::class, 'create'])->name('register.create');
+    Route::post('register', [RegisterController::class, 'store'])->name('register.store');
+});
+
+Route::middleware(['auth', 'student'])->group(function() {
+    Route::get('/', function () {
+        return Inertia::render('Home');
+    })->name('home');
+});
+
+Route::middleware(['auth', 'cashier'])->group(function () {
+    Route::get('cashier/testing', function () {
+        return 'Hello';
+    });
+});
+
+Route::middleware(['auth', 'admin'])->group(function() {
+
+});
+
