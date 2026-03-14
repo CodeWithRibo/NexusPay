@@ -39,7 +39,7 @@ const toServiceSelection = () => {
             <div class="z-1">
                 <Button
                     @click="toServiceSelection"
-                    class="bg-white fill-white text-black font-bold text-3xl hover:text-4xl py-12 px-32 hover:py-12 hover:px-33.75 transition-all duration-300ms hover:bg-white hover:drop-shadow-lg hover:drop-shadow-white"
+                    class="bg-white fill-white text-black font-bold text-3xl hover:text-[33px] py-12 px-32 hover:py-12 hover:px-32.5 transition-all duration-300ms hover:bg-white hover:border-white hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
                 >
                     TAP TO START
                     <span> <ArrowRight class="size-7" /></span>
