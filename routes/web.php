@@ -20,8 +20,6 @@ use App\Http\Controllers\Kiosk\TuitionFeeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-
 
 
 Route::middleware('auth')->group(function() {
@@ -37,7 +35,6 @@ Route::middleware('auth')->group(function() {
 Route::middleware(['guest'])->group(function () {
     Route::get('login', [LoginController::class, 'create'])->defaults('role', 'student')->name('login');
     Route::post('login', [LoginController::class, 'store'])->defaults('role', 'student')->name('login.store');
-
     Route::get('admin/login', [LoginController::class, 'create'])->defaults('role', 'admin')->name('admin.login');
     Route::post('admin/login', [LoginController::class, 'store'])->defaults('role', 'admin')->name('admin.login.store');
 
