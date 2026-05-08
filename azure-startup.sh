@@ -1,18 +1,33 @@
 #!/bin/bash
 
-echo "Starting NexusPay custom Nginx configuration..."
+# 1. Force Nginx to use the correct port and Laravel root
+cat <<EOF > /etc/nginx/sites-available/default
+server {
+    listen 80;
+    listen [::]:80;
+    root /home/site/wwwroot/public;
+    index index.php index.html index.htm;
+    server_name _;
 
-# 1. Backup the original config
-cp /etc/nginx/sites-available/default /etc/nginx/sites-available/default.bak
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
 
-# 2. Update the root path to /public
-sed -i 's|root /home/site/wwwroot;|root /home/site/wwwroot/public;|g' /etc/nginx/sites-available/default
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    }
+}
+EOF
 
-# 3. Fix Laravel/Inertia routing (try_files)
-sed -i 's|try_files $uri $uri/ =404;|try_files $uri $uri/ /index.php?$query_string;|g' /etc/nginx/sites-available/default
+# 2. Re-verify PHP configuration (ensure it listens on 9000)
+# Some images require PHP to bind to 0.0.0.0 to talk to Nginx
+sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|g' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null
 
-# 4. Reload Nginx to apply changes
-service nginx reload
+# 3. Restart both services to clear the "Bad Gateway"
+service php-fpm restart 2>/dev/null || service php8.2-fpm restart
+service nginx restart
 
-echo "Nginx reloaded successfully!"
-
+# 4. Final check: Run Laravel artisan to see if PHP is healthy
+php /home/site/wwwroot/artisan about
