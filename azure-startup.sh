@@ -1,39 +1,58 @@
-#!/bin/bash
+# name this file as "startup.sh" and call it from "startup command" as "/home/startup.sh"
+# check out my YouTube video "https://youtu.be/-PGhVFsOnGA"
+cp /home/default /etc/nginx/sites-enabled/default
 
-echo "Starting NexusPay custom deployment sequence..."
+cp /home/php.ini /usr/local/etc/php/conf.d/php.ini
 
-# 1. Overwrite Nginx to use TCP Port 9000 (found in your www.conf)
-cat <<EOF > /etc/nginx/sites-available/default
-server {
-    listen 80;
-    listen [::]:80;
-    root /home/site/wwwroot/public;
-    index index.php index.html index.htm;
-    server_name _;
 
-    location / {
-        try_files \$uri \$uri/ /index.php?\$query_string;
-    }
+# install support for webp file conversion
+apt-get update --allow-releaseinfo-change && apt-get install -y libfreetype6-dev \
+                libjpeg62-turbo-dev \
+                libpng-dev \
+                libwebp-dev \
+        && docker-php-ext-configure gd --with-freetype --with-webp  --with-jpeg
+docker-php-ext-install gd
 
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass 0.0.0.0:9000;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    }
-}
-EOF
+# install support for queue
+apt-get install -y supervisor
 
-# 2. Fix Permissions (Crucial for 502/500 errors)
-chown -R www-data:www-data /home/site/wwwroot/storage /home/site/wwwroot/bootstrap/cache
-chmod -R 775 /home/site/wwwroot/storage /home/site/wwwroot/bootstrap/cache
+cp /home/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
 
-# 3. Restart Services
-# We try multiple service names because Azure images vary
-service php-fpm restart || service php8.2-fpm restart
+# restart nginx
 service nginx restart
+service supervisor restart
 
-# 4. Clear Laravel Cache to prevent old config issues
-php /home/site/wwwroot/artisan config:clear
-php /home/site/wwwroot/artisan view:clear
 
-echo "Deployment sequence complete!"
+php /home/site/wwwroot/artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
+
+php /home/site/wwwroot/artisan migrate --force
+
+# Clear caches
+php /home/site/wwwroot/artisan cache:clear
+
+# Clear expired password reset tokens
+#php /home/site/wwwroot/artisan auth:clear-resets
+
+# Clear and cache routes
+php /home/site/wwwroot/artisan route:cache
+
+# Clear and cache config
+php /home/site/wwwroot/artisan config:cache
+
+# Clear and cache views
+php /home/site/wwwroot/artisan view:cache
+
+# Install node modules
+# npm ci
+
+# Build assets using Laravel Mix
+# npm run production --silent
+
+# uncomment next line if you dont have S3 or Blob storage
+#php /home/site/wwwroot/artisan storage:link
+
+# Turn off maintenance mode
+php /home/site/wwwroot/artisan up
+
+# run worker
+#nohup php /home/site/wwwroot/artisan queue:work &
