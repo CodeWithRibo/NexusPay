@@ -1,58 +1,40 @@
-# name this file as "startup.sh" and call it from "startup command" as "/home/startup.sh"
-# check out my YouTube video "https://youtu.be/-PGhVFsOnGA"
-# Copy from your deployed code folder to the system folder
-cp /home/site/wwwroot/default /etc/nginx/sites-enabled/default
-cp /home/site/wwwroot/php.ini /usr/local/etc/php/conf.d/php.ini
+#!/bin/bash
+# startup.sh for Laravel on Azure
 
+# Copy configs if present
+[ -f /home/site/wwwroot/default ] && cp /home/site/wwwroot/default /etc/nginx/sites-enabled/default
+[ -f /home/site/wwwroot/php.ini ] && cp /home/site/wwwroot/php.ini /usr/local/etc/php/conf.d/php.ini
 
-# install support for webp file conversion
-apt-get update --allow-releaseinfo-change && apt-get install -y libfreetype6-dev \
-                libjpeg62-turbo-dev \
-                libpng-dev \
-                libwebp-dev \
-        && docker-php-ext-configure gd --with-freetype --with-webp  --with-jpeg
+# Install GD + Supervisor
+apt-get update --allow-releaseinfo-change
+apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev libwebp-dev supervisor
+docker-php-ext-configure gd --with-freetype --with-webp --with-jpeg
 docker-php-ext-install gd
 
-# install support for queue
-apt-get install -y supervisor
+# Supervisor worker config
+[ -f /home/laravel-worker.conf ] && cp /home/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
 
-cp /home/laravel-worker.conf /etc/supervisor/conf.d/laravel-worker.conf
-
-# restart nginx
 service nginx restart
 service supervisor restart
 
+# Laravel setup
+cd /home/site/wwwroot
 
-php /home/site/wwwroot/artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
+# Install PHP dependencies
+composer install --no-dev --optimize-autoloader
 
-php /home/site/wwwroot/artisan migrate --force
+php artisan down --refresh=15 --secret="1630542a-246b-4b66-afa1-dd72a4c43515"
+php artisan migrate --force
+php artisan cache:clear
+php artisan route:cache
+php artisan config:cache
+php artisan view:cache
+# php artisan storage:link   # uncomment if needed
+php artisan up
 
-# Clear caches
-php /home/site/wwwroot/artisan cache:clear
-
-# Clear expired password reset tokens
-#php /home/site/wwwroot/artisan auth:clear-resets
-
-# Clear and cache routes
-php /home/site/wwwroot/artisan route:cache
-
-# Clear and cache config
-php /home/site/wwwroot/artisan config:cache
-
-# Clear and cache views
-php /home/site/wwwroot/artisan view:cache
-
-# Install node modules
+# Optional: build frontend assets
 # npm ci
-
-# Build assets using Laravel Mix
 # npm run production --silent
 
-# uncomment next line if you dont have S3 or Blob storage
-#php /home/site/wwwroot/artisan storage:link
-
-# Turn off maintenance mode
-php /home/site/wwwroot/artisan up
-
-# run worker
-#nohup php /home/site/wwwroot/artisan queue:work &
+# Optional: run queue worker
+# nohup php artisan queue:work &
