@@ -52,13 +52,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: php-app
-
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_704EE98F360342A299B9CE3C262AF374 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3CC659C509F94BFA9C342B63F3D904F2 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_AFCA29A018414F9AA97339437F04FA29 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FDE1AF4C38BF4CBA80585CAB8BC58485 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8F39951A441B4B9F8A60C81E7BD4C0CD }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9497B9F3AA4C42968EEEDC9CC9E78530 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
@@ -67,3 +67,4 @@ jobs:
           app-name: 'nexuspay'
           slot-name: 'Production'
           package: .
+          
