@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Kiosk;
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Kiosk\ReceiptService;
 use Inertia\Inertia;
 
 class DynamicReceiptController extends Controller
@@ -50,6 +51,7 @@ class DynamicReceiptController extends Controller
         $totalOverpayment = $student->over_payment ?? 0;
 
         return Inertia::render('kiosk/Results/Receipt', [
+            'transaction_id' => $transaction_id,
             'student_name' => $student->information->first_name . ' ' . $student->information->last_name ?? 'Unknown',
             'student_id' => $student->student_id,
             'student_email' => $student->email,
@@ -67,5 +69,60 @@ class DynamicReceiptController extends Controller
             'transaction_date' => $payment->created_at->format('F d, Y \a\t h:i A'),
             'status' => $payment->status,
         ]);
+    }
+
+    public function download($transaction_id)
+    {
+        $student = User::query()
+            ->where('id', auth()->id())
+            ->with([
+                'information:id,first_name,last_name,user_id',
+                'studentBalances' => function ($query) {
+                    $query->latest()
+                        ->select(['id', 'fee_name', 'total_amount', 'paid_amount', 'user_id']);
+                },
+            ])->findOrFail(auth()->id());
+
+        $payment = Payment::query()
+            ->where('transaction_id', $transaction_id)
+            ->where('user_id', auth()->id())
+            ->with('studentBalance:id,fee_name,total_amount,paid_amount')
+            ->firstOrFail();
+
+        if ($payment->status !== 'completed') {
+            abort(403, 'Payment not completed');
+        }
+
+        $studentBalance = $payment->studentBalance;
+        $feeCategory = $studentBalance?->fee_name ?? 'Payment';
+        $totalPaidToDate = $studentBalance?->paid_amount ?? 0;
+        $currentBalance = max($studentBalance?->total_amount - $totalPaidToDate, 0);
+
+        $currentOverpayment = session("current_overpayment_{$transaction_id}", 0);
+        $overpaymentUsed = session("overpayment_used_{$transaction_id}", 0);
+        $totalOverpayment = $student->over_payment ?? 0;
+
+        $receiptData = [
+            'student_name' => $student->information->first_name . ' ' . $student->information->last_name ?? 'Unknown',
+            'student_email' => $student->email,
+            'student_id' => $student->student_id,
+            'reference_number' => $payment->reference_no,
+            'fee_category' => $feeCategory,
+            'amount_paid' => $payment->amount_paid,
+            'payment_channel' => $payment->payment_channel,
+            'payment_method' => $payment->gateway_method ?? 'Cash',
+            'total_paid_to_date' => $totalPaidToDate,
+            'outstanding_balance' => $currentBalance,
+            'current_overpayment' => $currentOverpayment,
+            'overpayment_used' => $overpaymentUsed,
+            'total_overpayment' => $totalOverpayment,
+            'transaction_date' => $payment->created_at->format('F d, Y \a\t h:i A'),
+            'status' => $payment->status,
+        ];
+
+        $dompdf = ReceiptService::generateReceiptPdf($receiptData);
+        $filename = "receipt_{$payment->reference_no}_" . date('YmdHis') . ".pdf";
+
+        return $dompdf->stream($filename, ['Attachment' => 1]);
     }
 }

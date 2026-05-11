@@ -6,13 +6,14 @@ import { Printer, Home, User, Info, CheckCircle } from "lucide-vue-next";
 import { Button } from "@/components/ui/button/index.js";
 import HeaderSection from "@/Pages/components/layout/kiosk/HeaderSection.vue";
 import LeavingModal from "@/components/LeavingModal.vue";
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import IdleScanner from "@/components/IdleScanner.vue";
 
 const page = usePage();
 const user = computed(() => page.props.auth.user === null);
 const isAuth = computed(() => Boolean(!user.value));
 const props = defineProps({
+    transaction_id: String,
     student_name: String,
     student_email: String,
     student_id: String,
@@ -44,6 +45,8 @@ const formattedPaymentMethod = computed(() => {
 });
 
 const leavingModal = ref(false);
+const isDownloading = ref(false);
+const pdfGenerated = ref(false);
 
 const formatCurrency = (amount) => {
     return new Intl.NumberFormat("en-PH", {
@@ -59,6 +62,49 @@ const handleLogout = () => {
 const handleLeavingModal = () => {
     leavingModal.value = true;
 };
+
+const handlePrintReceipt = async () => {
+    isDownloading.value = true;
+    try {
+        const currentRoute = route().current();
+        const routeName = currentRoute.startsWith("kiosk.tuition-fee")
+            ? "kiosk.tuition-fee.receipt.download"
+            : "kiosk.receipt.download";
+        
+        const url = route(routeName, { transaction_id: props.transaction_id });
+        
+        const response = await fetch(url);
+        if (response.ok) {
+            const blob = await response.blob();
+            const link = document.createElement("a");
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `receipt_${props.reference_number}.pdf`;
+            link.click();
+            window.URL.revokeObjectURL(link.href);
+        } else {
+            console.error("Failed to download receipt. Status:", response.status);
+        }
+    } catch (error) {
+        console.error("Failed to download receipt:", error);
+    } finally {
+        isDownloading.value = false;
+    }
+};
+
+const autoGenerateReceipt = async () => {
+    if (pdfGenerated.value) return;
+    
+    try {
+        await handlePrintReceipt();
+        pdfGenerated.value = true;
+    } catch (error) {
+        console.error("Auto-generation failed, user can still download manually:", error);
+    }
+};
+
+onMounted(() => {
+    autoGenerateReceipt();
+});
 </script>
 
 <template>
@@ -229,10 +275,12 @@ const handleLeavingModal = () => {
                         </div>
 
                         <Button
-                            class="w-full h-16 rounded-full bg-zinc-400/10 hover:bg-zinc-400/20 text-white font-bold text-lg border-none shadow-none transition-all active:scale-[0.98] cursor-pointer"
+                            @click="handlePrintReceipt"
+                            :disabled="isDownloading"
+                            class="w-full h-16 rounded-full bg-zinc-400/10 hover:bg-zinc-400/20 text-white font-bold text-lg border-none shadow-none transition-all active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Printer class="size-6 mr-3 opacity-60" />
-                            Print Receipt
+                            {{ isDownloading ? "Downloading..." : "Download Receipt" }}
                         </Button>
                     </div>
 

@@ -65,6 +65,7 @@ Route::middleware(['auth', 'student'])->group(function() {
     Route::post('kiosk/tuition-fee/processing/{transaction_id}', [ProcessingPaymentController::class, 'process'])->name('kiosk.tuition-fee.processing.process');
     Route::get('kiosk/tuition-fee/processing/{transaction_id}', [ProcessingPaymentController::class, 'index'])->name('kiosk.tuition-fee.processing.index');
     Route::get('kiosk/tuition-fee/receipt/{transaction_id}', ReceiptController::class)->name('kiosk.tuition-fee.receipt');
+    Route::get('kiosk/tuition-fee/receipt/{transaction_id}/download', [ReceiptController::class, 'download'])->name('kiosk.tuition-fee.receipt.download');
     Route::post('kiosk/paymongo/initiate', [PaymongoPaymentController::class, 'initiate'])->name('kiosk.paymongo.initiate');
     Route::get('kiosk/paymongo/checkout/{transaction_id}', [PaymongoPaymentController::class, 'checkout'])->name('kiosk.paymongo.checkout');
     Route::get('kiosk/paymongo/status/{transaction_id}', [PaymongoPaymentController::class, 'status'])->name('kiosk.paymongo.status');
@@ -80,6 +81,7 @@ Route::middleware(['auth', 'student'])->group(function() {
     Route::get('kiosk/processing/{transaction_id}', [DynamicProcessingPaymentController::class, 'index'])->name('kiosk.processing.index');
     Route::post('kiosk/processing/{transaction_id}', [DynamicProcessingPaymentController::class, 'process'])->name('kiosk.processing.process');
     Route::get('kiosk/receipt/{transaction_id}', DynamicReceiptController::class)->name('kiosk.receipt');
+    Route::get('kiosk/receipt/{transaction_id}/download', [DynamicReceiptController::class, 'download'])->name('kiosk.receipt.download');
 
 });
 
