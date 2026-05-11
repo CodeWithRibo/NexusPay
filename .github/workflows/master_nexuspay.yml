@@ -23,15 +23,14 @@ jobs:
         with:
           php-version: '8.2'
 
-      - name: Check if composer.json exists
-        id: check_files
-        uses: andstor/file-existence-action@v1
-        with:
-          files: 'composer.json'
+      - name: Install PHP dependencies
+        run: composer install --no-dev --optimize-autoloader
 
-      - name: Run composer install if composer.json exists
-        if: steps.check_files.outputs.files_exists == 'true'
-        run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
+      - name: Install Node dependencies
+        run: npm install
+
+      - name: Build frontend assets
+        run: npm run build
 
 
       - name: Upload artifact for deployment job
@@ -56,9 +55,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_FDE1AF4C38BF4CBA80585CAB8BC58485 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8F39951A441B4B9F8A60C81E7BD4C0CD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_9497B9F3AA4C42968EEEDC9CC9E78530 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_3BA723442E8E4EC8AF284B7466BDF6AA }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_1A52DF1AAC34468E9A8884EEB7A2B185 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_231BFF297FD9478B9EADE3A47D3511D6 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
