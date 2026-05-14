@@ -1,6 +1,6 @@
 # Nexus Pay - Kiosk Payment System
 
-## 📋 Introduction
+## ℹ️ Introduction
 
 **Nexus Pay** is a prototype software application designed for a physical kiosk machine that serves as an alternative payment method for students paying their school fees. It provides a more convenient and hassle-free way for students to complete payments while reducing the manual processes involved in traditional fee collection.
 
@@ -8,7 +8,7 @@
 
 ---
 
-## 🎯 System Overview
+## 📊 System Overview
 
 Nexus Pay streamlines the student tuition fee payment process through an intuitive kiosk interface. The system handles payment processing, balance tracking, multiple payment methods, and receipt generation — all designed for ease of use in an educational institution environment.
 
@@ -25,7 +25,7 @@ Nexus Pay streamlines the student tuition fee payment process through an intuiti
 
 ---
 
-## 💳 Payment Methods Supported
+## 💰 Payment Methods Supported
 
 The system supports multiple payment options to accommodate different student preferences:
 
@@ -35,7 +35,7 @@ The system supports multiple payment options to accommodate different student pr
 
 ---
 
-## 📱 System Workflow & Screenshots
+## 🖼️ System Workflow & Screenshots
 
 ### Landing Screen - Initial Interface
 ![img.png](img.png)
@@ -79,7 +79,7 @@ Automatic logout functionality ensuring secure kiosk operation between users
 
 ---
 
-## 🛠️ Technology Stack
+## 💻 Technology Stack
 
 - **Backend**: Laravel PHP Framework
 - **Frontend**: Vue.js with Inertia.js
@@ -88,6 +88,6 @@ Automatic logout functionality ensuring secure kiosk operation between users
 - **Build Tool**: Vite
 ---
 
-## 📝 License & Notes
+## ⚖️ License & Notes
 
 This is a prototype software for educational kiosk payment systems. All features are subject to testing and refinement.
